@@ -1,0 +1,47 @@
+@mixin H1Style {
+  font-family: Poppins, sans-serif;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%;
+  text-transform: uppercase;
+  font-feature-settings: 'salt' on;
+  font-display: block;
+}
+@mixin H2Style {
+  font-family: Jost, sans-serif;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%;
+  text-transform: uppercase;
+  font-feature-settings: 'salt' on;
+  font-display: block;
+}
+@mixin H3Style {
+  font-family: Jost, sans-serif;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%;
+  font-feature-settings: 'salt' on;
+  font-display: block;
+}
+@mixin H4Style {
+  font-family: Montserrat, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  font-feature-settings: 'salt' on;
+  font-display: block;
+}
+@mixin P1Style {
+  font-family: Montserrat, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 300;
+  line-height: normal;
+  font-feature-settings: 'salt' on;
+  font-display: block;
+}
