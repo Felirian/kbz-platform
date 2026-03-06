@@ -1,6 +1,8 @@
 import type {Metadata} from "next";
 import {Jost} from "next/font/google";
 import "../_app/styles/global.scss";
+import {ThemeProvider} from "@/_app/providers/ThemeProvider";
+import {ThemeToggle} from "@/widgets/shared/ui/ThemeToggle";
 
 const PoppinsFont = Jost({
   weight: ['400', '500', '600', '700'],
@@ -17,7 +19,10 @@ export default function RootLayout({children,}: Readonly<{ children: React.React
   return (
     <html lang="ru">
     <body className={`${PoppinsFont.variable}`}>
-    {children}
+    <ThemeProvider>
+      {children}
+      <ThemeToggle />
+    </ThemeProvider>
     </body>
     </html>
   );

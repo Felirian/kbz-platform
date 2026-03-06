@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import {getMdContent, MdContent} from "@/utils/mdRouterParcer";
-import MarkDownParcer from "@/utils/markDownParcer";
+import MarkDownParcer from "@/widgets/shared/components/markDownParcer";
 import s from './wikiPage.module.scss';
 import Breadcrumbs from "@/widgets/shared/components/Breadcrumbs";
 import Bibliography from "@/widgets/shared/components/Bibliography";
