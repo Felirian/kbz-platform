@@ -12,6 +12,8 @@ export interface MdEntry {
 
 export interface MdContent {
   title: string
+  date?: string
+  author?: string
   contentHtml: string
 }
 
@@ -36,12 +38,15 @@ export async function getMdContent(slug: string[]): Promise<MdContent | null>{
 
   return {
     title: data.title,
+    date: data?.date || undefined,
+    author: data?.author || undefined,
     contentHtml: content
   }
 }
 
-export function getMdEntries(currentSlug: string[] = ['']) {
+export function getMdEntries(currentSlug: string[] = ['']): MdEntry[] {
   let res: MdEntry[] = [];
+
   const currentDir = path.join(mdDir, ...currentSlug)
   if (!fs.existsSync(currentDir) || !fs.statSync(currentDir).isDirectory()) {
     console.error('no entries');

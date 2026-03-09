@@ -1,10 +1,10 @@
 import type {Metadata} from "next";
-import {Montserrat_Alternates} from "next/font/google";
+import {Raleway} from "next/font/google";
 import "../_app/styles/global.scss";
 import {ThemeProvider} from "@/_app/providers/ThemeProvider";
 import {ThemeToggle} from "@/widgets/shared/ui/ThemeToggle";
 
-const Font = Montserrat_Alternates({
+const Font = Raleway({
   weight: ['400', '500', '600', '700'],
   variable: "--font-main",
   subsets: ['latin', 'cyrillic'],

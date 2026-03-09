@@ -29,9 +29,7 @@ export default async function MdPage({ params }: PageProps) {
   const { slug } = await params
 
   const content = await getMdContent(slug)
-
-  // console.log(content);
-
+  console.log(content);
   if (!content) return notFound()
 
   return (
@@ -40,10 +38,15 @@ export default async function MdPage({ params }: PageProps) {
         <Link href="/public">Home</Link>
         <Breadcrumbs currentSlug={slug}/>
       </header>
-      <main>
+      <main className={s.wikiPage}>
         <Bibliography currentSlug={slug}/>
+        <div className={s.meta}>
+          {content.date && <span>{new Date(content.date).toLocaleDateString('ru-RU')}</span>}
+          {content.date && content.author && <span className={s.metaDot} />}
+          {content.author && <span>{content.author}</span>}
+        </div>
         <MarkDownParcer
-          className={s.articleContent}
+          className={s.content}
           text={content.contentHtml}
         />
       </main>
