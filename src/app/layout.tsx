@@ -1,12 +1,12 @@
 import type {Metadata} from "next";
-import {Jost} from "next/font/google";
+import {Montserrat_Alternates} from "next/font/google";
 import "../_app/styles/global.scss";
 import {ThemeProvider} from "@/_app/providers/ThemeProvider";
 import {ThemeToggle} from "@/widgets/shared/ui/ThemeToggle";
 
-const PoppinsFont = Jost({
+const Font = Montserrat_Alternates({
   weight: ['400', '500', '600', '700'],
-  variable: "--font-poppins",
+  variable: "--font-main",
   subsets: ['latin', 'cyrillic'],
 });
 
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function RootLayout({children,}: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="ru">
-    <body className={`${PoppinsFont.variable}`}>
+    <body className={`${Font.variable}`}>
     <ThemeProvider>
       {children}
       <ThemeToggle />

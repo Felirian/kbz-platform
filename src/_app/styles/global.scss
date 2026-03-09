@@ -32,15 +32,15 @@
 }
 
 :root {
-  --font-sans: var(--font-jost), system-ui, -apple-system, sans-serif;
-  --font-alt: var(--font-montserrat), system-ui, sans-serif;
+  --font-sans: var(--font-main), system-ui, -apple-system, sans-serif;
+  --font-alt: var(--font-main), system-ui, sans-serif;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-main), system-ui, sans-serif;
   font-weight: normal;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 
