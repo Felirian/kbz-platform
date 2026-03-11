@@ -67,7 +67,6 @@ body {
 
 main {
   width: 100%;
-  max-width: 1000px;
   margin: 80px auto;
   @include laptop {
     margin: 20px auto;
@@ -131,20 +130,17 @@ button {
 }
 
 a {
+  color: #6ea8fe;
   text-decoration: none;
-  color: red;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
   line-height: inherit;
   font-weight: inherit;
   font-size: inherit;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  transition: color 0.3s ease;
 
   &:hover {
-    color: blue;
-  }
-
-  &::after {
-    content: '↗';
+    border-bottom-color: #6ea8fe;
   }
 }
 
@@ -153,7 +149,6 @@ b {
 }
 
 ul, li {
-
   padding: 0;
   margin: 0;
 }

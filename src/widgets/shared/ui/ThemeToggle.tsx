@@ -1,6 +1,6 @@
 "use client";
 
-import { useThemeStore } from "@/_app/providers/themeStore";
+import { useThemeStore } from "@/store/themeStore";
 import styles from "./ThemeToggle.module.scss";
 
 export function ThemeToggle() {
