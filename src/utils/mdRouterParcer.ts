@@ -1,8 +1,12 @@
-import fs from 'fs'
-import path from 'path'
 import matter from 'gray-matter';
 
-const mdDir = path.join(process.cwd(),'src','_app', 'mockData', 'wiki')
+const GITHUB_OWNER = process.env.WIKI_GITHUB_OWNER ?? 'Felirian'
+const GITHUB_REPO = process.env.WIKI_GITHUB_REPO ?? 'kbz-storage'
+const GITHUB_BRANCH = process.env.WIKI_GITHUB_BRANCH ?? 'main'
+const LOCALE = process.env.WIKI_LOCALE ?? 'ru'
+const CONTENT_ROOT = `storage/${LOCALE}`
+
+const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`
 
 export interface MdEntry {
   name: string
@@ -17,58 +21,84 @@ export interface MdContent {
   contentHtml: string
 }
 
-export async function getMdContent(slug: string[]): Promise<MdContent | null>{
-  const filePath = path.join(mdDir, ...slug) + '.md'
+interface GhFile {
+  type: 'file'
+  name: string
+  path: string
+  content: string
+  encoding: 'base64'
+}
 
-  const indexFilePath = path.join(mdDir, ...slug, 'index.md')
+interface GhDirItem {
+  type: 'file' | 'dir'
+  name: string
+  path: string
+}
 
-  let resolvedPath: string
+type GhResponse = GhFile | GhDirItem[]
 
-  if (fs.existsSync(filePath)) {
-    resolvedPath = filePath
-  } else if (fs.existsSync(indexFilePath)) {
-    resolvedPath = indexFilePath
-  } else {
-    console.error('Could not find file: ' + filePath + ' or ' + indexFilePath)
-    return null
+async function fetchGh(relPath: string): Promise<GhResponse | null> {
+  const url = `${API_BASE}/${relPath}?ref=${GITHUB_BRANCH}`
+  const headers: Record<string, string> = {
+    Accept: 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28',
+  }
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
   }
 
-  const fileContents = fs.readFileSync(resolvedPath, 'utf8')
-  const {data, content} = matter(fileContents)
+  const res = await fetch(url, {
+    headers,
+    next: { revalidate: 3600, tags: ['wiki'] },
+  })
+
+  if (res.status === 404) return null
+  if (!res.ok) {
+    throw new Error(`GitHub API ${res.status}: ${await res.text()}`)
+  }
+  return res.json()
+}
+
+function decodeBase64(content: string): string {
+  return Buffer.from(content, 'base64').toString('utf8')
+}
+
+export async function getMdContent(slug: string[]): Promise<MdContent | null> {
+  const base = [CONTENT_ROOT, ...slug].join('/')
+
+  let data = await fetchGh(`${base}.md`)
+  if (!data) data = await fetchGh(`${base}/index.md`)
+  if (!data || Array.isArray(data) || data.type !== 'file') return null
+
+  const raw = decodeBase64(data.content)
+  const { data: frontmatter, content } = matter(raw)
 
   return {
-    title: data.title,
-    date: data?.date || undefined,
-    author: data?.author || undefined,
-    contentHtml: content
+    title: frontmatter.title,
+    date: frontmatter.date || undefined,
+    author: frontmatter.author || undefined,
+    contentHtml: content,
   }
 }
 
-export function getMdEntries(currentSlug: string[] = ['']): MdEntry[] {
-  let res: MdEntry[] = [];
+export async function getMdEntries(currentSlug: string[] = []): Promise<MdEntry[]> {
+  const relPath = [CONTENT_ROOT, ...currentSlug].filter(Boolean).join('/')
+  const data = await fetchGh(relPath)
+  if (!data || !Array.isArray(data)) return []
 
-  const currentDir = path.join(mdDir, ...currentSlug)
-  if (!fs.existsSync(currentDir) || !fs.statSync(currentDir).isDirectory()) {
-    console.error('no entries');
-    return []
-  }
-
-  const entries = fs.readdirSync(currentDir, { withFileTypes: true })
-
-  entries.map(entry => {
-    if (entry.isDirectory()) {
-      const children = getMdEntries([...currentSlug, entry.name])
-      if (children.length === 0) return
-      res.push({
-        name: entry.name,
-        children: children
-      })
-    } else {
-      res.push({
-        name: entry.name.replace('.md', ''),
-        slug: currentSlug.join('/') + '/' + entry.name.replace('.md', '')
+  const entries: MdEntry[] = []
+  for (const item of data) {
+    if (item.type === 'dir') {
+      const children = await getMdEntries([...currentSlug, item.name])
+      if (children.length === 0) continue
+      entries.push({ name: item.name, children })
+    } else if (item.type === 'file' && item.name.endsWith('.md')) {
+      const nameNoExt = item.name.replace(/\.md$/, '')
+      entries.push({
+        name: nameNoExt,
+        slug: [...currentSlug, nameNoExt].join('/'),
       })
     }
-  })
-  return res
+  }
+  return entries
 }
