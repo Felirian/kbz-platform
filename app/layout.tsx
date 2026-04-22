@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
 import {Raleway} from "next/font/google";
-import "../_app/styles/global.scss";
-import {ThemeProvider} from "@/_app/providers/ThemeProvider";
+import '@/app/styles/global.scss'
+import {ThemeProvider} from "@/app/providers/ThemeProvider";
 import {ThemeToggle} from "@/widgets/shared/ui/ThemeToggle";
 
 const Font = Raleway({
