@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import {getMdContent} from "@/utils/mdRouterParcer";
-import MarkDownParcer from "@/widgets/shared/components/wikiPage/markDownParcer";
-import s from './wikiPage.module.scss';
-import Breadcrumbs from "@/widgets/shared/components/Breadcrumbs";
-import {Metadata} from "next";
+import { getMdContent } from '@/entities/wiki'
+import { Breadcrumbs } from '@/features/breadcrumbs'
+import { WikiArticle } from '@/widgets/WikiArticle'
+import { wikiSource } from '../_source'
+import s from './wikiPage.module.scss'
 
 interface PageProps {
   params: Promise<{ slug: string[] }>
@@ -12,43 +12,24 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const content = await getMdContent(slug)
+  const content = await getMdContent(wikiSource, slug)
 
-  if (!content) {
-    return { title: 'Not Found' }
-  }
+  if (!content) return { title: 'Not Found' }
 
-  return {
-    title: `${content.title} — kbz-test`,
-  }
+  return { title: `${content.title} — kbz-test` }
 }
-
 
 export default async function MdPage({ params }: PageProps) {
   const { slug } = await params
 
-  const content = await getMdContent(slug)
-
-  if (!content) return notFound()
-
   return (
     <>
-      <header >
-        <Link href="/public">Home</Link>
-        <Breadcrumbs currentSlug={slug}/>
+      <header>
+        <Link href="/">Home</Link>
+        <Breadcrumbs currentSlug={slug} />
       </header>
-      <main >
-        {/*<Bibliography currentSlug={slug}/>*/}
-        {/*<div className={s.meta}>*/}
-        {/*  {content.date && <span>{new Date(content.date).toLocaleDateString('ru-RU')}</span>}*/}
-        {/*  {content.date && content.author && <span className={s.metaDot} />}*/}
-        {/*  {content.author && <span>{content.author}</span>}*/}
-        {/*</div>*/}
-        <MarkDownParcer
-          className={s.content}
-          text={content.contentHtml}
-        />
-        <div/>
+      <main>
+        <WikiArticle source={wikiSource} slug={slug} className={s.content} />
       </main>
     </>
   )

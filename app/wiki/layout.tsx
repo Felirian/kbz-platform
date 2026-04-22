@@ -1,11 +1,12 @@
+import { WikiNav } from '@/widgets/WikiNav'
+import { wikiSource } from './_source'
 import s from './[...slug]/wikiPage.module.scss'
-import Bibliography from "@/widgets/shared/components/wikiPage/Bibliography";
 
-export default function WikiLayout({children}: { children: React.ReactNode }) {
+export default function WikiLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={s.wikiPage}>
-      <Bibliography/>
+      <WikiNav source={wikiSource} />
       {children}
     </div>
-  );
+  )
 }

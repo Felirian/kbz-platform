@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import {Raleway} from "next/font/google";
 import '@/app/styles/global.scss'
 import {ThemeProvider} from "@/app/providers/ThemeProvider";
-import {ThemeToggle} from "@/widgets/shared/ui/ThemeToggle";
+import {ThemeToggle} from "@/features/theme-toggle";
 
 const Font = Raleway({
   weight: ['400', '500', '600', '700'],

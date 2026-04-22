@@ -1,21 +1,22 @@
 'use client'
 
-import { MdEntry } from "@/utils/mdRouterParcer";
-import Link from "next/link";
-import { useBibliographyStore } from "@/store/useBibliographyStore";
-import s from "@/widgets/shared/components/wikiPage/Bibliography/Bibliography.module.scss";
-import EntryList from "@/widgets/shared/components/wikiPage/Bibliography/EntryList";
-import dynamic from "next/dynamic";
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
+import type { MdEntry } from '@/entities/wiki'
+import { useWikiNavStore } from '../model/store'
+import s from './WikiNav.module.scss'
+import EntryList from './EntryList'
 
 interface EntryItemProps {
-  entry: MdEntry,
-  depth: number,
-  itemKey: string,
+  entry: MdEntry
+  depth: number
+  itemKey: string
+  basePath: string
 }
 
-function EntryItemInner({ entry, depth, itemKey }: EntryItemProps) {
-  const toggle = useBibliographyStore((s) => s.toggle)
-  const isOpen = useBibliographyStore((s) => s.isOpen(itemKey))
+function EntryItemInner({ entry, depth, itemKey, basePath }: EntryItemProps) {
+  const toggle = useWikiNavStore((s) => s.toggle)
+  const isOpen = useWikiNavStore((s) => s.isOpen(itemKey))
   const hasChildren = entry.children && entry.children.length > 0
 
   return (
@@ -36,7 +37,7 @@ function EntryItemInner({ entry, depth, itemKey }: EntryItemProps) {
         )}
 
         {entry.slug ? (
-          <Link href={`/wiki/${entry.slug}`} className={s.item__link}>
+          <Link href={`${basePath}/${entry.slug}`} className={s.item__link}>
             {entry.name}
           </Link>
         ) : (
@@ -51,7 +52,7 @@ function EntryItemInner({ entry, depth, itemKey }: EntryItemProps) {
 
       {hasChildren && (
         <div className={`${s.item__children} ${isOpen ? s.item__children_open : ''}`}>
-          <EntryList entries={entry.children!} depth={depth + 1} keyPrefix={itemKey} />
+          <EntryList entries={entry.children!} depth={depth + 1} keyPrefix={itemKey} basePath={basePath} />
         </div>
       )}
     </li>

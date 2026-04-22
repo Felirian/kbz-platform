@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface BibliographyStore {
+interface WikiNavStore {
   openItems: Record<string, boolean>
   _hydrated: boolean
   setHydrated: () => void
@@ -9,7 +9,7 @@ interface BibliographyStore {
   isOpen: (key: string) => boolean
 }
 
-export const useBibliographyStore = create<BibliographyStore>()(
+export const useWikiNavStore = create<WikiNavStore>()(
   persist(
     (set, get) => ({
       openItems: {},
@@ -32,11 +32,11 @@ export const useBibliographyStore = create<BibliographyStore>()(
       },
     }),
     {
-      name: 'bibliography-open-items',
+      name: 'wiki-nav-open-items',
       onRehydrateStorage: () => (state) => {
         state?.setHydrated()
       },
       partialize: (state) => ({ openItems: state.openItems }),
-    }
-  )
+    },
+  ),
 )

@@ -1,25 +1,5 @@
-import matter from 'gray-matter';
-
-const GITHUB_OWNER = process.env.WIKI_GITHUB_OWNER ?? 'Felirian'
-const GITHUB_REPO = process.env.WIKI_GITHUB_REPO ?? 'kbz-storage'
-const GITHUB_BRANCH = process.env.WIKI_GITHUB_BRANCH ?? 'main'
-const LOCALE = process.env.WIKI_LOCALE ?? 'ru'
-const CONTENT_ROOT = `storage/${LOCALE}`
-
-const API_BASE = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents`
-
-export interface MdEntry {
-  name: string
-  slug?: string
-  children?: MdEntry[]
-}
-
-export interface MdContent {
-  title: string
-  date?: string
-  author?: string
-  contentHtml: string
-}
+import matter from 'gray-matter'
+import type { MdContent, MdEntry, WikiSource } from '../model/types'
 
 interface GhFile {
   type: 'file'
@@ -37,8 +17,7 @@ interface GhDirItem {
 
 type GhResponse = GhFile | GhDirItem[]
 
-async function fetchGh(relPath: string): Promise<GhResponse | null> {
-  const url = `${API_BASE}/${relPath}?ref=${GITHUB_BRANCH}`
+function buildHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
     'X-GitHub-Api-Version': '2022-11-28',
@@ -46,10 +25,16 @@ async function fetchGh(relPath: string): Promise<GhResponse | null> {
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`
   }
+  return headers
+}
+
+async function fetchGh(source: WikiSource, relPath: string): Promise<GhResponse | null> {
+  const branch = source.branch ?? 'main'
+  const url = `https://api.github.com/repos/${source.owner}/${source.repo}/contents/${relPath}?ref=${branch}`
 
   const res = await fetch(url, {
-    headers,
-    next: { revalidate: 3600, tags: ['wiki'] },
+    headers: buildHeaders(),
+    next: { revalidate: 3600, tags: ['wiki', `wiki:${source.owner}/${source.repo}`] },
   })
 
   if (res.status === 404) return null
@@ -63,11 +48,15 @@ function decodeBase64(content: string): string {
   return Buffer.from(content, 'base64').toString('utf8')
 }
 
-export async function getMdContent(slug: string[]): Promise<MdContent | null> {
-  const base = [CONTENT_ROOT, ...slug].join('/')
+function joinPath(parts: string[]): string {
+  return parts.filter(Boolean).join('/')
+}
 
-  let data = await fetchGh(`${base}.md`)
-  if (!data) data = await fetchGh(`${base}/index.md`)
+export async function getMdContent(source: WikiSource, slug: string[]): Promise<MdContent | null> {
+  const base = joinPath([source.root ?? '', ...slug])
+
+  let data = await fetchGh(source, `${base}.md`)
+  if (!data) data = await fetchGh(source, joinPath([base, 'index.md']))
   if (!data || Array.isArray(data) || data.type !== 'file') return null
 
   const raw = decodeBase64(data.content)
@@ -81,22 +70,22 @@ export async function getMdContent(slug: string[]): Promise<MdContent | null> {
   }
 }
 
-export async function getMdEntries(currentSlug: string[] = []): Promise<MdEntry[]> {
-  const relPath = [CONTENT_ROOT, ...currentSlug].filter(Boolean).join('/')
-  const data = await fetchGh(relPath)
+export async function getMdEntries(source: WikiSource, slug: string[] = []): Promise<MdEntry[]> {
+  const relPath = joinPath([source.root ?? '', ...slug])
+  const data = await fetchGh(source, relPath)
   if (!data || !Array.isArray(data)) return []
 
   const entries: MdEntry[] = []
   for (const item of data) {
     if (item.type === 'dir') {
-      const children = await getMdEntries([...currentSlug, item.name])
+      const children = await getMdEntries(source, [...slug, item.name])
       if (children.length === 0) continue
       entries.push({ name: item.name, children })
     } else if (item.type === 'file' && item.name.endsWith('.md')) {
       const nameNoExt = item.name.replace(/\.md$/, '')
       entries.push({
         name: nameNoExt,
-        slug: [...currentSlug, nameNoExt].join('/'),
+        slug: [...slug, nameNoExt].join('/'),
       })
     }
   }
