@@ -1,14 +1,9 @@
-import React from 'react';
-import {getMdEntries, MdEntry} from "@/utils/mdRouterParcer";
+import { getMdEntries } from "@/utils/mdRouterParcer";
 import EntryList from "@/widgets/shared/components/wikiPage/Bibliography/EntryList";
 import s from "@/widgets/shared/components/wikiPage/Bibliography/Bibliography.module.scss";
 
-interface Props {
-  // currentSlug: string[]
-}
-
-const Index = ({}: Props) => {
-  const entries = getMdEntries()
+export default async function Bibliography() {
+  const entries = await getMdEntries()
 
   if (entries.length === 0) return <>No entries</>
 
@@ -18,6 +13,4 @@ const Index = ({}: Props) => {
       <EntryList entries={entries} />
     </div>
   );
-};
-
-export default Index;
+}
