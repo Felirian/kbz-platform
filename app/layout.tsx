@@ -1,7 +1,9 @@
 import type {Metadata} from "next";
 import {Raleway} from "next/font/google";
 import '@/app/styles/global.scss'
+import {FontSizeProvider} from "@/app/providers/FontSizeProvider";
 import {ThemeProvider} from "@/app/providers/ThemeProvider";
+import {FontSizeToggle} from "@/features/font-size-toggle";
 import {ThemeToggle} from "@/features/theme-toggle";
 
 const Font = Raleway({
@@ -20,8 +22,11 @@ export default function RootLayout({children,}: Readonly<{ children: React.React
     <html lang="ru">
     <body className={`${Font.variable}`}>
     <ThemeProvider>
-      {children}
-      <ThemeToggle />
+      <FontSizeProvider>
+        <FontSizeToggle />
+        {children}
+        <ThemeToggle />
+      </FontSizeProvider>
     </ThemeProvider>
     </body>
     </html>
