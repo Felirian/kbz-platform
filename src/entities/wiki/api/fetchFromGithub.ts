@@ -28,6 +28,20 @@ function buildHeaders(): Record<string, string> {
   return headers
 }
 
+export type WikiFetchErrorKind = 'rate-limit' | 'unauthorized' | 'unknown'
+
+export class WikiFetchError extends Error {
+  kind: WikiFetchErrorKind
+  status: number
+
+  constructor(kind: WikiFetchErrorKind, status: number, message: string) {
+    super(message)
+    this.name = 'WikiFetchError'
+    this.kind = kind
+    this.status = status
+  }
+}
+
 async function fetchGh(source: WikiSource, relPath: string): Promise<GhResponse | null> {
   const branch = source.branch ?? 'main'
   const url = `https://api.github.com/repos/${source.owner}/${source.repo}/contents/${relPath}?ref=${branch}`
@@ -39,7 +53,14 @@ async function fetchGh(source: WikiSource, relPath: string): Promise<GhResponse 
 
   if (res.status === 404) return null
   if (!res.ok) {
-    throw new Error(`GitHub API ${res.status}: ${await res.text()}`)
+    const body = await res.text()
+    if (res.status === 403 && /rate limit/i.test(body)) {
+      throw new WikiFetchError('rate-limit', res.status, 'GitHub API rate limit exceeded')
+    }
+    if (res.status === 401) {
+      throw new WikiFetchError('unauthorized', res.status, 'GitHub API unauthorized')
+    }
+    throw new WikiFetchError('unknown', res.status, `GitHub API ${res.status}: ${body}`)
   }
   return res.json()
 }

@@ -1,2 +1,2 @@
 export type { MdContent, MdEntry, WikiSource } from './model/types'
-export { getMdContent, getMdEntries } from './api/fetchFromGithub'
+export { getMdContent, getMdEntries, WikiFetchError } from './api/fetchFromGithub'

@@ -12,11 +12,13 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const content = await getMdContent(wikiSource, slug)
-
-  if (!content) return { title: 'Not Found' }
-
-  return { title: `${content.title} — kbz-test` }
+  try {
+    const content = await getMdContent(wikiSource, slug)
+    if (!content) return { title: 'Not Found' }
+    return { title: `${content.title} — kbz-test` }
+  } catch {
+    return { title: 'kbz-test' }
+  }
 }
 
 export default async function MdPage({ params }: PageProps) {
