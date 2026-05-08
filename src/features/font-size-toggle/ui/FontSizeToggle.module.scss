@@ -1,28 +1,13 @@
-@use '@/app/styles/variables' as *;
-
 .bar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 8px;
-  padding: 8px 24px;
-  background: color-mix(in srgb, var(--color-bg) 80%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--color-border);
-
-  @include mobile {
-    padding: 8px 16px;
-  }
+  color: var(--color-text);
 }
 
 .label {
   font-size: 13px;
   color: var(--color-text-secondary);
-  margin-right: 4px;
 }
 
 .group {
@@ -30,7 +15,7 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   overflow: hidden;
-  background: var(--color-surface);
+  background: var(--color-bg);
 }
 
 .btn {
@@ -41,7 +26,7 @@
   cursor: pointer;
   border: none;
   border-right: 1px solid var(--color-border);
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 
   &:last-child {
     border-right: none;

@@ -3,10 +3,10 @@ import { persist } from 'zustand/middleware'
 
 export type FontSize = 'small' | 'medium' | 'large'
 
-export const FONT_SIZE_PX: Record<FontSize, number> = {
-  small: 14,
-  medium: 16,
-  large: 20,
+export const TEXT_SCALE: Record<FontSize, number> = {
+  small: 0.875,
+  medium: 1,
+  large: 1.25,
 }
 
 interface FontSizeState {

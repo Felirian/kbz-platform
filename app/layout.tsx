@@ -3,7 +3,6 @@ import {Raleway} from "next/font/google";
 import '@/app/styles/global.scss'
 import {FontSizeProvider} from "@/app/providers/FontSizeProvider";
 import {ThemeProvider} from "@/app/providers/ThemeProvider";
-import {FontSizeToggle} from "@/features/font-size-toggle";
 import {ThemeToggle} from "@/features/theme-toggle";
 
 const Font = Raleway({
@@ -23,7 +22,6 @@ export default function RootLayout({children,}: Readonly<{ children: React.React
     <body className={`${Font.variable}`}>
     <ThemeProvider>
       <FontSizeProvider>
-        <FontSizeToggle />
         {children}
         <ThemeToggle />
       </FontSizeProvider>

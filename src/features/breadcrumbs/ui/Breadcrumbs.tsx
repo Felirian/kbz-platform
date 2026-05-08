@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import s from './Breadcrumbs.module.scss'
 
 interface BreadcrumbsProps {
   currentSlug: string[]
@@ -9,12 +10,16 @@ const sliceSlug = (slug: string[], index: number) => slug.slice(0, index + 1).jo
 
 export function Breadcrumbs({ currentSlug, basePath = '/wiki' }: BreadcrumbsProps) {
   return (
-    <div>
+    <nav className={s.crumbs} aria-label="breadcrumbs">
       {currentSlug.map((item, index) => (
-        <Link key={sliceSlug(currentSlug, index)} href={`${basePath}/${sliceSlug(currentSlug, index)}`}>
+        <Link
+          key={sliceSlug(currentSlug, index)}
+          className={s.link}
+          href={`${basePath}/${sliceSlug(currentSlug, index)}`}
+        >
           /{item}
         </Link>
       ))}
-    </div>
+    </nav>
   )
 }

@@ -1,0 +1,26 @@
+.crumbs {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    color: var(--color-link-hover);
+    background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+
+  &:last-child {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+}

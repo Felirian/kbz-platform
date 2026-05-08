@@ -34,7 +34,7 @@
 :root {
   --font-sans: var(--font-main), system-ui, -apple-system, sans-serif;
   --font-alt: var(--font-main), system-ui, sans-serif;
-  --p-font-size: 16px;
+  --text-scale: 1;
 }
 
 * {
@@ -111,7 +111,6 @@ h4, h5, h6 {
 
 p {
   @include P1Style;
-  font-size: var(--p-font-size, 16px);
 }
 
 button {
