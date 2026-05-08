@@ -1,10 +1,12 @@
+@use '@/app/styles/variables' as *;
+
 .themeToggle {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 1.5rem;
+  right: 1.5rem;
   z-index: 9999;
-  width: 48px;
-  height: 48px;
+  width: 3rem;
+  height: 3rem;
   border-radius: 50%;
   background-color: var(--color-toggle-bg);
   color: var(--color-toggle-fg);
@@ -12,11 +14,25 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid var(--color-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 0.125rem solid var(--color-border);
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1;
+
+  @include tablet {
+    width: 2.75rem;
+    height: 2.75rem;
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+  @include mobile {
+    width: 2.5rem;
+    height: 2.5rem;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 1.25rem;
+  }
 
   &:hover {
     transform: scale(1.1);

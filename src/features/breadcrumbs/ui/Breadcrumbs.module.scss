@@ -1,10 +1,19 @@
+@use '@/app/styles/variables' as *;
+
 .crumbs {
   display: inline-flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 2px;
+  gap: 0.125rem;
   font-size: 1rem;
   color: var(--color-text-secondary);
+
+  @include tablet {
+    font-size: 0.9375rem;
+  }
+  @include mobile {
+    font-size: 0.875rem;
+  }
 }
 
 .link {

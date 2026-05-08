@@ -1,42 +1,77 @@
+@use '@/app/styles/variables' as *;
+
 @mixin H1Style {
-  font-size: 32px;
+  font-size: 2rem;
   font-style: normal;
   font-weight: 600;
   line-height: 100%;
   text-transform: uppercase;
   font-feature-settings: 'salt' on;
   font-display: block;
+
+  @include tablet {
+    font-size: 1.75rem;
+  }
+  @include mobile {
+    font-size: 1.5rem;
+  }
 }
+
 @mixin H2Style {
-  font-size: 32px;
+  font-size: 2rem;
   font-style: normal;
   font-weight: 600;
   line-height: 100%;
   text-transform: uppercase;
   font-feature-settings: 'salt' on;
   font-display: block;
+
+  @include tablet {
+    font-size: 1.5rem;
+  }
+  @include mobile {
+    font-size: 1.25rem;
+  }
 }
+
 @mixin H3Style {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-style: normal;
   font-weight: 600;
   line-height: 100%;
   font-feature-settings: 'salt' on;
   font-display: block;
+
+  @include tablet {
+    font-size: 1.25rem;
+  }
+  @include mobile {
+    font-size: 1.125rem;
+  }
 }
+
 @mixin H4Style {
-  font-size: 16px;
+  font-size: 1rem;
   font-style: normal;
   font-weight: 600;
   line-height: normal;
   font-feature-settings: 'salt' on;
   font-display: block;
+
+  @include mobile {
+    font-size: 0.9375rem;
+  }
 }
+
 @mixin P1Style {
-  font-size: 16px;
+  font-size: 1rem;
   font-style: normal;
   font-weight: 300;
   line-height: normal;
   font-feature-settings: 'salt' on;
   font-display: block;
+
+  @include mobile {
+    font-size: 0.9375rem;
+  }
 }

@@ -3,19 +3,27 @@
 
 .wikiPage {
   margin: 0;
-  padding: 48px 24px 80px;
+  padding: 3rem 1.5rem 5rem;
   font-family: inherit;
   color: var(--color-text);
 
   display: flex;
   width: 100%;
   justify-content: center;
+  gap: 1.5rem;
 
+  @include laptop {
+    padding: 3rem 1.25rem 4rem;
+    gap: 1.25rem;
+  }
   @include tablet {
-    padding: 36px 20px 60px;
+    padding: 2.5rem 1rem 3rem;
+    gap: 1rem;
+    flex-direction: column;
   }
   @include mobile {
-    padding: 24px 16px 40px;
+    padding: 1.5rem 0.75rem 2rem;
+    gap: 0.75rem;
   }
 }
 
@@ -28,13 +36,18 @@
   gap: 1rem;
   padding: 0.5rem 1rem;
   backdrop-filter: blur(0.5rem);
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 0.0625rem solid var(--color-border);
   background: var(--color-bg-2);
   color: var(--color-text);
   flex-wrap: wrap;
 
+  @include tablet {
+    padding: 0.5rem 0.875rem;
+    gap: 0.75rem;
+  }
   @include mobile {
-    padding: 10px 16px;
+    padding: 0.5rem 0.625rem;
+    gap: 0.5rem;
   }
 
   a {
@@ -51,10 +64,13 @@
 .title {
   font-size: calc(2.4rem * var(--text-scale, 1));
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
   letter-spacing: -0.02em;
   color: var(--color-text);
 
+  @include tablet {
+    font-size: calc(2rem * var(--text-scale, 1));
+  }
   @include mobile {
     font-size: calc(1.6rem * var(--text-scale, 1));
   }
@@ -63,17 +79,23 @@
 .meta {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0.75rem;
   font-size: calc(0.85rem * var(--text-scale, 1));
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 0.0625rem solid var(--color-border);
   color: var(--color-text-secondary);
+
+  @include mobile {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    gap: 0.5rem;
+  }
 }
 
 .metaDot {
-  width: 4px;
-  height: 4px;
+  width: 0.25rem;
+  height: 0.25rem;
   border-radius: 50%;
   background: var(--color-text-secondary);
 }
@@ -81,6 +103,10 @@
 .articleWrapper {
   position: relative;
   margin: 0 1rem;
+
+  @include tablet {
+    margin: 0;
+  }
 }
 
 /* ===== Markdown-контент ===== */
@@ -88,44 +114,90 @@
   width: 100%;
   color: var(--color-text);
   background-color: var(--color-surface);
-  padding: 1rem;
+  padding: 1.5rem;
   border-radius: 1rem;
+
+  @include tablet {
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+  }
+  @include mobile {
+    padding: 1rem;
+    border-radius: 0.625rem;
+  }
+
   h1 {
     font-size: calc(2rem * var(--text-scale, 1));
     font-weight: 700;
-    margin: 48px 0 16px;
+    margin: 3rem 0 1rem;
     letter-spacing: -0.01em;
     color: var(--color-text);
+
+    @include tablet {
+      font-size: calc(1.75rem * var(--text-scale, 1));
+      margin: 2rem 0 0.875rem;
+    }
+    @include mobile {
+      font-size: calc(1.5rem * var(--text-scale, 1));
+      margin: 1.5rem 0 0.75rem;
+    }
   }
 
   h2 {
     font-size: calc(1.5rem * var(--text-scale, 1));
     font-weight: 600;
-    margin: 40px 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--color-border);
+    margin: 2.5rem 0 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 0.0625rem solid var(--color-border);
     color: var(--color-text);
+
+    @include tablet {
+      font-size: calc(1.35rem * var(--text-scale, 1));
+      margin: 1.75rem 0 0.625rem;
+    }
+    @include mobile {
+      font-size: calc(1.2rem * var(--text-scale, 1));
+      margin: 1.25rem 0 0.5rem;
+    }
   }
 
   h3 {
     font-size: calc(1.2rem * var(--text-scale, 1));
     font-weight: 600;
-    margin: 32px 0 8px;
+    margin: 2rem 0 0.5rem;
     color: var(--color-text);
+
+    @include tablet {
+      font-size: calc(1.1rem * var(--text-scale, 1));
+      margin: 1.5rem 0 0.5rem;
+    }
+    @include mobile {
+      font-size: calc(1rem * var(--text-scale, 1));
+      margin: 1.25rem 0 0.375rem;
+    }
   }
 
   p {
-    margin: 0 0 16px;
+    margin: 0 0 1rem;
     color: var(--color-text);
+
+    @include mobile {
+      margin: 0 0 0.75rem;
+    }
   }
 
   ul,
   ol {
-    margin: 0 0 16px;
-    padding-left: 24px;
+    margin: 0 0 1rem;
+    padding-left: 1.5rem;
+
+    @include mobile {
+      padding-left: 1.125rem;
+      margin: 0 0 0.75rem;
+    }
 
     li {
-      margin-bottom: 6px;
+      margin-bottom: 0.375rem;
       color: var(--color-text);
     }
   }
@@ -136,12 +208,17 @@
   }
 
   blockquote {
-    margin: 24px 0;
-    padding: 12px 20px;
-    border-left: 3px solid var(--color-link);
+    margin: 1.5rem 0;
+    padding: 0.75rem 1.25rem;
+    border-left: 0.1875rem solid var(--color-link);
     background: color-mix(in srgb, var(--color-text) 4%, transparent);
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 0.5rem 0.5rem 0;
     color: var(--color-text-secondary);
+
+    @include mobile {
+      margin: 1rem 0;
+      padding: 0.625rem 0.875rem;
+    }
 
     p {
       margin: 0;
@@ -154,24 +231,39 @@
     font-size: calc(0.875em * var(--text-scale, 1));
     background: color-mix(in srgb, var(--color-text) 8%, transparent);
     color: var(--color-text);
-    padding: 2px 7px;
-    border-radius: 6px;
-    border: 1px solid var(--color-border);
+    padding: 0.125rem 0.4375rem;
+    border-radius: 0.375rem;
+    border: 0.0625rem solid var(--color-border);
     word-break: break-word;
     white-space: nowrap;
+
+    @include mobile {
+      font-size: calc(0.85em * var(--text-scale, 1));
+      padding: 0.0625rem 0.3125rem;
+    }
   }
 
   pre {
-    margin: 24px 0;
-    padding: 20px 24px;
+    margin: 1.5rem 0;
+    padding: 1.25rem 1.5rem;
     background: color-mix(in srgb, var(--color-text) 6%, transparent);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
+    border: 0.0625rem solid var(--color-border);
+    border-radius: 0.75rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 
+    @include tablet {
+      padding: 1rem 1.125rem;
+      margin: 1.25rem 0;
+    }
+    @include mobile {
+      padding: 0.75rem 0.875rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+
     &::-webkit-scrollbar {
-      height: 6px;
+      height: 0.375rem;
     }
 
     &::-webkit-scrollbar-track {
@@ -180,7 +272,7 @@
 
     &::-webkit-scrollbar-thumb {
       background: var(--color-border);
-      border-radius: 3px;
+      border-radius: 0.1875rem;
     }
 
     code {
@@ -193,28 +285,48 @@
       color: var(--color-text);
       white-space: pre;
       word-break: normal;
+
+      @include mobile {
+        font-size: calc(0.8rem * var(--text-scale, 1));
+      }
     }
   }
 
   hr {
     border: none;
-    height: 1px;
+    height: 0.0625rem;
     background: var(--color-border);
-    margin: 32px 0;
+    margin: 2rem 0;
+
+    @include mobile {
+      margin: 1.25rem 0;
+    }
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 24px 0;
+    margin: 1.5rem 0;
     font-size: calc(0.95rem * var(--text-scale, 1));
+    display: block;
+    overflow-x: auto;
+
+    @include mobile {
+      font-size: calc(0.85rem * var(--text-scale, 1));
+      margin: 1rem 0;
+    }
 
     th,
     td {
-      padding: 10px 14px;
+      padding: 0.625rem 0.875rem;
       text-align: left;
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 0.0625rem solid var(--color-border);
       color: var(--color-text);
+      white-space: nowrap;
+
+      @include mobile {
+        padding: 0.5rem 0.625rem;
+      }
     }
 
     th {
@@ -229,8 +341,13 @@
 
   img {
     max-width: 100%;
-    border-radius: 12px;
-    margin: 24px 0;
+    border-radius: 0.75rem;
+    margin: 1.5rem 0;
+
+    @include mobile {
+      border-radius: 0.5rem;
+      margin: 1rem 0;
+    }
   }
 
   a {

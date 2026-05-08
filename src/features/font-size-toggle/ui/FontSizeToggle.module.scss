@@ -1,32 +1,47 @@
+@use '@/app/styles/variables' as *;
+
 .bar {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
   color: var(--color-text);
+
+  @include mobile {
+    gap: 0.375rem;
+  }
 }
 
 .label {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-text-secondary);
+
+  @include mobile {
+    font-size: 0.75rem;
+  }
 }
 
 .group {
   display: inline-flex;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.5rem;
   overflow: hidden;
   background: var(--color-bg);
 }
 
 .btn {
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-text);
   background: transparent;
   cursor: pointer;
   border: none;
-  border-right: 1px solid var(--color-border);
+  border-right: 0.0625rem solid var(--color-border);
   transition: background-color 0.15s ease, color 0.15s ease;
+
+  @include mobile {
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.75rem;
+  }
 
   &:last-child {
     border-right: none;
