@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { getMdContent } from '@/entities/wiki'
-import { Breadcrumbs } from '@/features/breadcrumbs'
 import { ArticleControls } from '@/widgets/ArticleControls'
 import { WikiArticle } from '@/widgets/WikiArticle'
 import { wikiSource } from '../_source'
@@ -26,15 +24,9 @@ export default async function MdPage({ params }: PageProps) {
   const { slug } = await params
 
   return (
-    <>
-      <header className={s.header}>
-        <Link href="/">Home</Link>
-        <Breadcrumbs currentSlug={slug} />
-      </header>
-      <main>
-        <ArticleControls />
-        <WikiArticle source={wikiSource} slug={slug} className={s.content} />
-      </main>
-    </>
+    <div>
+      <ArticleControls />
+      <WikiArticle source={wikiSource} slug={slug} className={s.content} />
+    </div>
   )
 }

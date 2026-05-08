@@ -5,20 +5,24 @@
 :root,
 [data-theme="dark"] {
   --color-bg: #313131;
+  --color-bg-2: rgba(49, 49, 49, 0.5);
   --color-text: #FFFFFF;
   --color-text-secondary: #7C7C7C;
   --color-link: #9cbff3;
-  --color-link-hover: #FFFFFF;
+  --color-link-hover: #dde7f6;
   --color-selection-text: black;
   --color-selection-bg: rgba(255, 255, 255, 0.5);
   --color-surface: #3d3d3d;
   --color-border: #4a4a4a;
   --color-toggle-bg: #4a4a4a;
   --color-toggle-fg: #FFFFFF;
+
+
 }
 
 [data-theme="light"] {
   --color-bg: #F5F5F5;
+  --color-bg-2: rgba(245, 245, 245, 0.5);
   --color-text: #1a1a1a;
   --color-text-secondary: #666666;
   --color-link: #2563eb;

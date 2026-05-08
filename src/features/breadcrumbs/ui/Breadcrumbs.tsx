@@ -1,25 +1,36 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 import s from './Breadcrumbs.module.scss'
 
 interface BreadcrumbsProps {
-  currentSlug: string[]
   basePath?: string
 }
 
-const sliceSlug = (slug: string[], index: number) => slug.slice(0, index + 1).join('/')
+export function Breadcrumbs({ basePath = '/wiki' }: BreadcrumbsProps) {
+  const pathname = usePathname() ?? ''
 
-export function Breadcrumbs({ currentSlug, basePath = '/wiki' }: BreadcrumbsProps) {
+  const slug = useMemo(() => {
+    const stripped = pathname.startsWith(basePath)
+      ? pathname.slice(basePath.length)
+      : pathname
+    return stripped.split('/').filter(Boolean)
+  }, [pathname, basePath])
+
+  if (slug.length === 0) return null
+
   return (
     <nav className={s.crumbs} aria-label="breadcrumbs">
-      {currentSlug.map((item, index) => (
-        <Link
-          key={sliceSlug(currentSlug, index)}
-          className={s.link}
-          href={`${basePath}/${sliceSlug(currentSlug, index)}`}
-        >
-          /{item}
-        </Link>
-      ))}
+      {slug.map((item, index) => {
+        const href = `${basePath}/${slug.slice(0, index + 1).join('/')}`
+        return (
+          <Link key={href} className={s.link} href={href}>
+            /{item}
+          </Link>
+        )
+      })}
     </nav>
   )
 }
