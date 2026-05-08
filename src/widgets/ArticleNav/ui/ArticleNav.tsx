@@ -69,7 +69,7 @@ export function ArticleNav() {
 
   return (
     <nav className={s.nav} aria-label="Содержание статьи">
-      <h3 className={s.title}>На странице</h3>
+      <h3 className={s.title}>Оглавление</h3>
       <ul className={s.list}>
         {headings.map((h) => (
           <li key={h.id} className={s.item} data-level={h.level}>

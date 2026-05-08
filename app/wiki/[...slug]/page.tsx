@@ -24,7 +24,7 @@ export default async function MdPage({ params }: PageProps) {
   const { slug } = await params
 
   return (
-    <div>
+    <div className={s.articleWrapper}>
       <ArticleControls />
       <WikiArticle source={wikiSource} slug={slug} className={s.content} />
     </div>

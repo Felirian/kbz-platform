@@ -21,7 +21,7 @@
 }
 
 [data-theme="light"] {
-  --color-bg: #F5F5F5;
+  --color-bg: #ededed;
   --color-bg-2: rgba(245, 245, 245, 0.5);
   --color-text: #1a1a1a;
   --color-text-secondary: #666666;
@@ -29,8 +29,8 @@
   --color-link-hover: #1d4ed8;
   --color-selection-text: white;
   --color-selection-bg: rgba(37, 99, 235, 0.3);
-  --color-surface: #FFFFFF;
-  --color-border: #e0e0e0;
+  --color-surface: #ffffff;
+  --color-border: #ececec;
   --color-toggle-bg: #e0e0e0;
   --color-toggle-fg: #1a1a1a;
 }
@@ -58,7 +58,7 @@
 html {
   scroll-behavior: smooth;
   scroll-snap-type: y mandatory;
-  scroll-padding: 0;
+  scroll-padding: 7rem;
 }
 
 body {
@@ -135,17 +135,17 @@ button {
 }
 
 a {
-  color: #6ea8fe;
+  color: var(--color-link);
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, color 0.2s;
   line-height: inherit;
   font-weight: inherit;
   font-size: inherit;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-
   &:hover {
-    border-bottom-color: #6ea8fe;
+    //border-bottom-color: #6ea8fe;
+    color: var(--color-link-hover);
   }
 }
 

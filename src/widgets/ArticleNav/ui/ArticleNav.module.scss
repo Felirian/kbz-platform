@@ -1,14 +1,13 @@
 @use '@/app/styles/variables' as *;
 
 .nav {
+  width: 30%;
   height: fit-content;
   position: sticky;
-  top: 80px;
+  inset: 0;
+  top: 3rem;
   flex: 0 0 220px;
-  padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-surface);
+  padding: 1rem;
   color: var(--color-text);
 
   @include tablet {
@@ -22,7 +21,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--color-text-secondary);
+  color: var(--color-text);
 }
 
 .list {
@@ -59,22 +58,14 @@
 
 .link {
   display: block;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 13px;
   line-height: 1.4;
   color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: background-color 0.15s ease, color 0.15s ease;
 
   &:hover {
-    background: color-mix(in srgb, var(--color-text) 6%, transparent);
-    color: var(--color-text);
+
   }
 
   &.active {
-    color: var(--color-text);
-    background: color-mix(in srgb, var(--color-text) 8%, transparent);
-    font-weight: 500;
+
   }
 }
