@@ -1,7 +1,9 @@
 import type {Metadata} from "next";
 import {Raleway} from "next/font/google";
 import '@/app/styles/global.scss'
+import {ContentWidthProvider} from "@/app/providers/ContentWidthProvider";
 import {FontSizeProvider} from "@/app/providers/FontSizeProvider";
+import {LineHeightProvider} from "@/app/providers/LineHeightProvider";
 import {ThemeProvider} from "@/app/providers/ThemeProvider";
 import {ThemeToggle} from "@/features/theme-toggle";
 
@@ -22,8 +24,12 @@ export default function RootLayout({children,}: Readonly<{ children: React.React
     <body className={`${Font.variable}`}>
     <ThemeProvider>
       <FontSizeProvider>
-        {children}
-        <ThemeToggle />
+        <LineHeightProvider>
+          <ContentWidthProvider>
+            {children}
+            <ThemeToggle />
+          </ContentWidthProvider>
+        </LineHeightProvider>
       </FontSizeProvider>
     </ThemeProvider>
     </body>

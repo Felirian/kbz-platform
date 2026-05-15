@@ -116,6 +116,9 @@
 /* ===== Markdown-контент ===== */
 .content {
   width: 100%;
+  max-width: var(--content-max-width, 100%);
+  margin: 0 auto;
+  line-height: var(--content-line-height, 1.7);
   color: var(--color-text);
   background-color: var(--color-surface);
   padding: 1.5rem;

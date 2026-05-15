@@ -1,0 +1,44 @@
+.bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text);
+}
+
+.label {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.group {
+  display: inline-flex;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.btn {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  border-right: 0.0625rem solid var(--color-border);
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  }
+
+  &.active {
+    background: var(--color-toggle-bg);
+    color: var(--color-toggle-fg);
+    font-weight: 600;
+  }
+}
