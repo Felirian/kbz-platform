@@ -101,11 +101,15 @@
 }
 
 .articleWrapper {
+  flex: 1 1 0;
+  min-width: 0;
   position: relative;
   margin: 0 1rem;
 
   @include tablet {
+    flex: 1 1 100%;
     margin: 0;
+    width: 100%;
   }
 }
 

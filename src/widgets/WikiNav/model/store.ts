@@ -18,12 +18,22 @@ export const useWikiNavStore = create<WikiNavStore>()(
       setHydrated: () => set({ _hydrated: true }),
 
       toggle: (key: string) =>
-        set((state) => ({
-          openItems: {
-            ...state.openItems,
-            [key]: !state.openItems[key],
-          },
-        })),
+        set((state) => {
+          const wasOpen = !!state.openItems[key]
+          if (wasOpen) {
+            // collapse self and all descendants
+            const next: Record<string, boolean> = {}
+            const prefix = `${key}__`
+            for (const [k, v] of Object.entries(state.openItems)) {
+              if (k === key || k.startsWith(prefix)) continue
+              next[k] = v
+            }
+            return { openItems: next }
+          }
+          return {
+            openItems: { ...state.openItems, [key]: true },
+          }
+        }),
 
       isOpen: (key: string) => {
         const state = get()

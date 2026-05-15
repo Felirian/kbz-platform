@@ -36,7 +36,7 @@ function EntryItemInner({ entry, depth, itemKey, basePath }: EntryItemProps) {
           </button>
         )}
 
-        {entry.slug ? (
+        {entry.slug && !hasChildren ? (
           <Link href={`${basePath}/${entry.slug}`} className={s.item__link}>
             {entry.name}
           </Link>

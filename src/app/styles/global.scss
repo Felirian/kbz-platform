@@ -41,6 +41,11 @@
   --text-scale: 1;
 }
 
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 * {
   margin: 0;
   padding: 0;

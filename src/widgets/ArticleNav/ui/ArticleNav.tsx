@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import s from './ArticleNav.module.scss'
+import { ArticleNavSkeleton } from './ArticleNavSkeleton'
 
 interface Heading {
   id: string
@@ -14,11 +15,14 @@ const HEADING_SELECTOR = 'article :is(h1, h2, h3, h4, h5, h6)[id]'
 
 export function ArticleNav() {
   const pathname = usePathname()
-  const [headings, setHeadings] = useState<Heading[]>([])
+  // null = ещё не собирали (показываем скелетон), [] = собрали и пусто, [...] = есть
+  const [headings, setHeadings] = useState<Heading[] | null>(null)
   const [activeId, setActiveId] = useState<string | null>(null)
 
   // collect headings from DOM (re-runs when route or article changes)
   useEffect(() => {
+    setHeadings(null)
+
     const collect = () => {
       const nodes = document.querySelectorAll<HTMLElement>(HEADING_SELECTOR)
       const list: Heading[] = Array.from(nodes).map((n) => ({
@@ -27,7 +31,7 @@ export function ArticleNav() {
         level: Number(n.tagName.slice(1)),
       }))
       setHeadings((prev) => {
-        if (prev.length === list.length && prev.every((h, i) => h.id === list[i]?.id)) {
+        if (prev && prev.length === list.length && prev.every((h, i) => h.id === list[i]?.id)) {
           return prev
         }
         return list
@@ -38,12 +42,20 @@ export function ArticleNav() {
     const observer = new MutationObserver(collect)
     observer.observe(document.body, { childList: true, subtree: true })
 
-    return () => observer.disconnect()
+    // если статья всё ещё стримится — снять флаг скелетона по таймауту
+    const settle = setTimeout(() => {
+      setHeadings((prev) => (prev === null ? [] : prev))
+    }, 1500)
+
+    return () => {
+      observer.disconnect()
+      clearTimeout(settle)
+    }
   }, [pathname])
 
   // highlight active heading on scroll
   useEffect(() => {
-    if (headings.length === 0) return
+    if (!headings || headings.length === 0) return
 
     const nodes = headings
       .map((h) => document.getElementById(h.id))
@@ -65,6 +77,7 @@ export function ArticleNav() {
     return () => observer.disconnect()
   }, [headings])
 
+  if (headings === null) return <ArticleNavSkeleton />
   if (headings.length === 0) return null
 
   return (

@@ -1,0 +1,66 @@
+@use '@/app/styles/variables' as *;
+
+.skeleton {
+  width: 100%;
+}
+
+.banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.75rem 1rem;
+  margin: 0 0 1.5rem;
+  border-radius: 0.5rem;
+  border: 0.0625rem solid var(--color-border);
+  background: color-mix(in srgb, var(--color-text) 4%, transparent);
+}
+
+.bannerTitle {
+  font-size: calc(1rem * var(--text-scale, 1));
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.bannerText {
+  font-size: calc(0.875rem * var(--text-scale, 1));
+  color: var(--color-text-secondary);
+}
+
+.row {
+  height: 0.875rem;
+  border-radius: 0.375rem;
+  margin-bottom: 0.75rem;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--color-text) 6%, transparent) 0%,
+    color-mix(in srgb, var(--color-text) 14%, transparent) 50%,
+    color-mix(in srgb, var(--color-text) 6%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+
+  &.heading {
+    height: 1.75rem;
+    width: 40%;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  &.short {
+    width: 65%;
+  }
+  &.medium {
+    width: 85%;
+  }
+  &.long {
+    width: 100%;
+  }
+
+  &.block {
+    height: 6rem;
+    margin: 1.25rem 0;
+    border-radius: 0.5rem;
+  }
+}
+

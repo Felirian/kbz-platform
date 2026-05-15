@@ -42,11 +42,30 @@ export class WikiFetchError extends Error {
   }
 }
 
+async function fetchWithRetry(url: string, init: RequestInit & { next?: unknown }, retries = 2): Promise<Response> {
+  let lastErr: unknown
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, init)
+    } catch (err) {
+      lastErr = err
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 200 * 2 ** attempt))
+      }
+    }
+  }
+  throw new WikiFetchError(
+    'unknown',
+    0,
+    `Network error fetching ${url}: ${lastErr instanceof Error ? lastErr.message : String(lastErr)}`,
+  )
+}
+
 async function fetchGh(source: WikiSource, relPath: string): Promise<GhResponse | null> {
   const branch = source.branch ?? 'main'
   const url = `https://api.github.com/repos/${source.owner}/${source.repo}/contents/${relPath}?ref=${branch}`
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, {
     headers: buildHeaders(),
     next: { revalidate: 3600, tags: ['wiki', `wiki:${source.owner}/${source.repo}`] },
   })
@@ -65,12 +84,52 @@ async function fetchGh(source: WikiSource, relPath: string): Promise<GhResponse 
   return res.json()
 }
 
+async function mapWithConcurrency<T, U>(
+  items: T[],
+  limit: number,
+  fn: (item: T, index: number) => Promise<U>,
+): Promise<U[]> {
+  const results: U[] = new Array(items.length)
+  let cursor = 0
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const i = cursor++
+      if (i >= items.length) return
+      results[i] = await fn(items[i], i)
+    }
+  })
+  await Promise.all(workers)
+  return results
+}
+
 function decodeBase64(content: string): string {
   return Buffer.from(content, 'base64').toString('utf8')
 }
 
 function joinPath(parts: string[]): string {
   return parts.filter(Boolean).join('/')
+}
+
+const FRONTMATTER_RE = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?/
+
+function safeParseFrontmatter(raw: string): { data: Record<string, unknown>; content: string } {
+  try {
+    const parsed = matter(raw)
+    return { data: parsed.data as Record<string, unknown>, content: parsed.content }
+  } catch (err) {
+    console.warn('[wiki] failed to parse YAML frontmatter, falling back to raw content:', err)
+    const match = raw.match(FRONTMATTER_RE)
+    const content = match ? raw.slice(match[0].length) : raw
+    return { data: {}, content }
+  }
+}
+
+function deriveTitleFromSlug(slug: string[]): string {
+  const last = slug[slug.length - 1] ?? ''
+  if (!last) return 'Без названия'
+  return last
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 export async function getMdContent(source: WikiSource, slug: string[]): Promise<MdContent | null> {
@@ -81,12 +140,12 @@ export async function getMdContent(source: WikiSource, slug: string[]): Promise<
   if (!data || Array.isArray(data) || data.type !== 'file') return null
 
   const raw = decodeBase64(data.content)
-  const { data: frontmatter, content } = matter(raw)
+  const { data: frontmatter, content } = safeParseFrontmatter(raw)
 
   return {
-    title: frontmatter.title,
-    date: frontmatter.date || undefined,
-    author: frontmatter.author || undefined,
+    title: (frontmatter.title as string | undefined) ?? deriveTitleFromSlug(slug),
+    date: (frontmatter.date as string | undefined) || undefined,
+    author: (frontmatter.author as string | undefined) || undefined,
     contentHtml: content,
   }
 }
@@ -96,19 +155,36 @@ export async function getMdEntries(source: WikiSource, slug: string[] = []): Pro
   const data = await fetchGh(source, relPath)
   if (!data || !Array.isArray(data)) return []
 
-  const entries: MdEntry[] = []
-  for (const item of data) {
+  const entries = await mapWithConcurrency(data, 5, async (item): Promise<MdEntry | null> => {
     if (item.type === 'dir') {
-      const children = await getMdEntries(source, [...slug, item.name])
-      if (children.length === 0) continue
-      entries.push({ name: item.name, children })
-    } else if (item.type === 'file' && item.name.endsWith('.md')) {
-      const nameNoExt = item.name.replace(/\.md$/, '')
-      entries.push({
-        name: nameNoExt,
-        slug: [...slug, nameNoExt].join('/'),
-      })
+      const dirSlug = [...slug, item.name]
+      const [children, indexContent] = await Promise.all([
+        getMdEntries(source, dirSlug),
+        getMdContent(source, dirSlug),
+      ])
+      if (children.length === 0 && !indexContent) return null
+
+      return {
+        name: indexContent?.title ?? item.name,
+        slug: indexContent ? dirSlug.join('/') : undefined,
+        children: children.length > 0 ? children : undefined,
+      }
     }
-  }
-  return entries
+
+    if (item.type === 'file' && item.name.endsWith('.md')) {
+      const nameNoExt = item.name.replace(/\.md$/, '')
+      if (nameNoExt === 'index') return null
+
+      const fileSlug = [...slug, nameNoExt]
+      const content = await getMdContent(source, fileSlug)
+      return {
+        name: content?.title ?? nameNoExt,
+        slug: fileSlug.join('/'),
+      }
+    }
+
+    return null
+  })
+
+  return entries.filter((e): e is MdEntry => e !== null)
 }
