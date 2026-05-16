@@ -1,0 +1,13 @@
+services:
+  deploy:
+    image: felirian/kbz-platform:dev
+    container_name: kbz-platform
+    restart: unless-stopped
+    ports:
+      - 3300:3000
+    networks:
+      - site-network
+
+networks:
+  site-network:
+    external: true
