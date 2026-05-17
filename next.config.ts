@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'standalone',
   reactCompiler: true,
   turbopack: {
     resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.mjs', '.json', '.otf'],
