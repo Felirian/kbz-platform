@@ -90,7 +90,7 @@ export function ArticleNav() {
               href={`#${h.id}`}
               className={`${s.link} ${activeId === h.id ? s.active : ''}`}
             >
-              {h.text}
+              <p>{h.text}</p>
             </a>
           </li>
         ))}

@@ -9,6 +9,9 @@
   top: 3rem;
   padding: 1rem;
   color: var(--color-text);
+  ul {
+    gap: 1rem;
+  }
 
   @include laptop {
     flex: 0 0 12rem;
