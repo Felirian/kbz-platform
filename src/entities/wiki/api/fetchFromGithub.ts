@@ -1,21 +1,21 @@
 import matter from 'gray-matter'
 import type { MdContent, MdEntry, WikiSource } from '../model/types'
 
-interface GhFile {
-  type: 'file'
-  name: string
+interface GhTreeNode {
   path: string
-  content: string
-  encoding: 'base64'
+  mode: string
+  type: 'blob' | 'tree' | 'commit'
+  sha: string
+  size?: number
+  url: string
 }
 
-interface GhDirItem {
-  type: 'file' | 'dir'
-  name: string
-  path: string
+interface GhTreeResponse {
+  sha: string
+  url: string
+  tree: GhTreeNode[]
+  truncated: boolean
 }
-
-type GhResponse = GhFile | GhDirItem[]
 
 function buildHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
@@ -61,49 +61,61 @@ async function fetchWithRetry(url: string, init: RequestInit & { next?: unknown 
   )
 }
 
-async function fetchGh(source: WikiSource, relPath: string): Promise<GhResponse | null> {
+function throwForStatus(status: number, body: string): never {
+  if (status === 403 && /rate limit/i.test(body)) {
+    throw new WikiFetchError('rate-limit', status, 'GitHub API rate limit exceeded')
+  }
+  if (status === 401) {
+    throw new WikiFetchError('unauthorized', status, 'GitHub API unauthorized')
+  }
+  throw new WikiFetchError('unknown', status, `GitHub API ${status}: ${body}`)
+}
+
+/**
+ * Один HTTP-запрос к CDN raw.githubusercontent.com.
+ * Быстрее Contents API (нет base64-кодирования, нет JSON-оборачивания, кэш CDN),
+ * и без лимита 5000/час (он только на api.github.com).
+ */
+async function fetchRawMd(source: WikiSource, path: string): Promise<string | null> {
   const branch = source.branch ?? 'main'
-  const url = `https://api.github.com/repos/${source.owner}/${source.repo}/contents/${relPath}?ref=${branch}`
+  const url = `https://raw.githubusercontent.com/${source.owner}/${source.repo}/${branch}/${path}`
+
+  const init: RequestInit & { next?: unknown } = {
+    next: { revalidate: 3600, tags: ['wiki', `wiki:${source.owner}/${source.repo}`, 'wiki:raw'] },
+  }
+  if (process.env.GITHUB_TOKEN) {
+    init.headers = { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` }
+  }
+
+  const res = await fetchWithRetry(url, init)
+  if (res.status === 404) return null
+  if (!res.ok) throwForStatus(res.status, await res.text())
+  return res.text()
+}
+
+/**
+ * Один запрос — все пути репозитория (blob + tree).
+ * Дедуплицируется кэшем Next.js fetch внутри одного запроса.
+ */
+async function fetchRepoTree(source: WikiSource): Promise<GhTreeNode[]> {
+  const branch = source.branch ?? 'main'
+  const url = `https://api.github.com/repos/${source.owner}/${source.repo}/git/trees/${branch}?recursive=1`
 
   const res = await fetchWithRetry(url, {
     headers: buildHeaders(),
-    next: { revalidate: 3600, tags: ['wiki', `wiki:${source.owner}/${source.repo}`] },
+    next: { revalidate: 3600, tags: ['wiki', `wiki:${source.owner}/${source.repo}`, 'wiki:tree'] },
   })
 
-  if (res.status === 404) return null
-  if (!res.ok) {
-    const body = await res.text()
-    if (res.status === 403 && /rate limit/i.test(body)) {
-      throw new WikiFetchError('rate-limit', res.status, 'GitHub API rate limit exceeded')
-    }
-    if (res.status === 401) {
-      throw new WikiFetchError('unauthorized', res.status, 'GitHub API unauthorized')
-    }
-    throw new WikiFetchError('unknown', res.status, `GitHub API ${res.status}: ${body}`)
+  if (res.status === 404) return []
+  if (!res.ok) throwForStatus(res.status, await res.text())
+
+  const data = (await res.json()) as GhTreeResponse
+  if (data.truncated) {
+    console.warn(
+      `[wiki] git tree truncated for ${source.owner}/${source.repo} — репа слишком большая, часть путей не пришла`,
+    )
   }
-  return res.json()
-}
-
-async function mapWithConcurrency<T, U>(
-  items: T[],
-  limit: number,
-  fn: (item: T, index: number) => Promise<U>,
-): Promise<U[]> {
-  const results: U[] = new Array(items.length)
-  let cursor = 0
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const i = cursor++
-      if (i >= items.length) return
-      results[i] = await fn(items[i], i)
-    }
-  })
-  await Promise.all(workers)
-  return results
-}
-
-function decodeBase64(content: string): string {
-  return Buffer.from(content, 'base64').toString('utf8')
+  return data.tree
 }
 
 function joinPath(parts: string[]): string {
@@ -127,19 +139,16 @@ function safeParseFrontmatter(raw: string): { data: Record<string, unknown>; con
 function deriveTitleFromSlug(slug: string[]): string {
   const last = slug[slug.length - 1] ?? ''
   if (!last) return 'Без названия'
-  return last
-    .replace(/[-_]+/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  return last.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 export async function getMdContent(source: WikiSource, slug: string[]): Promise<MdContent | null> {
   const base = joinPath([source.root ?? '', ...slug])
 
-  let data = await fetchGh(source, `${base}.md`)
-  if (!data) data = await fetchGh(source, joinPath([base, 'index.md']))
-  if (!data || Array.isArray(data) || data.type !== 'file') return null
+  let raw = await fetchRawMd(source, `${base}.md`)
+  if (raw === null) raw = await fetchRawMd(source, joinPath([base, 'index.md']))
+  if (raw === null) return null
 
-  const raw = decodeBase64(data.content)
   const { data: frontmatter, content } = safeParseFrontmatter(raw)
 
   return {
@@ -150,41 +159,75 @@ export async function getMdContent(source: WikiSource, slug: string[]): Promise<
   }
 }
 
+function buildEntries(
+  paths: Set<string>,
+  allPaths: string[],
+  basePrefix: string,
+  baseSlug: string[],
+): MdEntry[] {
+  const filesAtLevel = new Map<string, string>() // имя без .md → полный путь
+  const dirsAtLevel = new Map<string, string[]>() // имя папки → пути внутри
+
+  for (const path of allPaths) {
+    const rel = basePrefix ? path.slice(basePrefix.length) : path
+    if (!rel) continue
+    const segments = rel.split('/')
+
+    if (segments.length === 1) {
+      const file = segments[0]
+      if (!file.endsWith('.md')) continue
+      const nameNoExt = file.slice(0, -3)
+      if (nameNoExt === 'index') continue
+      filesAtLevel.set(nameNoExt, path)
+    } else {
+      const dirName = segments[0]
+      if (!dirsAtLevel.has(dirName)) dirsAtLevel.set(dirName, [])
+      dirsAtLevel.get(dirName)!.push(path)
+    }
+  }
+
+  const entries: MdEntry[] = []
+
+  for (const [nameNoExt] of filesAtLevel) {
+    entries.push({
+      name: nameNoExt,
+      slug: [...baseSlug, nameNoExt].join('/'),
+    })
+  }
+
+  for (const [dirName, dirPaths] of dirsAtLevel) {
+    const subPrefix = basePrefix + dirName + '/'
+    const indexPath = subPrefix + 'index.md'
+    const hasIndex = paths.has(indexPath)
+    const children = buildEntries(paths, dirPaths, subPrefix, [...baseSlug, dirName])
+
+    if (children.length === 0 && !hasIndex) continue
+
+    entries.push({
+      name: dirName,
+      slug: hasIndex ? [...baseSlug, dirName].join('/') : undefined,
+      children: children.length > 0 ? children : undefined,
+    })
+  }
+
+  return entries
+}
+
 export async function getMdEntries(source: WikiSource, slug: string[] = []): Promise<MdEntry[]> {
-  const relPath = joinPath([source.root ?? '', ...slug])
-  const data = await fetchGh(source, relPath)
-  if (!data || !Array.isArray(data)) return []
+  const tree = await fetchRepoTree(source)
+  if (tree.length === 0) return []
 
-  const entries = await mapWithConcurrency(data, 5, async (item): Promise<MdEntry | null> => {
-    if (item.type === 'dir') {
-      const dirSlug = [...slug, item.name]
-      const [children, indexContent] = await Promise.all([
-        getMdEntries(source, dirSlug),
-        getMdContent(source, dirSlug),
-      ])
-      if (children.length === 0 && !indexContent) return null
+  const root = source.root ?? ''
+  const basePath = joinPath([root, ...slug])
+  const basePrefix = basePath ? basePath + '/' : ''
 
-      return {
-        name: indexContent?.title ?? item.name,
-        slug: indexContent ? dirSlug.join('/') : undefined,
-        children: children.length > 0 ? children : undefined,
-      }
-    }
+  // Все .md под текущим префиксом — единственный сетевой запрос для навигации.
+  const mdPaths = tree
+    .filter((n) => n.type === 'blob' && n.path.endsWith('.md'))
+    .map((n) => n.path)
+    .filter((p) => (basePrefix ? p.startsWith(basePrefix) : true))
 
-    if (item.type === 'file' && item.name.endsWith('.md')) {
-      const nameNoExt = item.name.replace(/\.md$/, '')
-      if (nameNoExt === 'index') return null
+  if (mdPaths.length === 0) return []
 
-      const fileSlug = [...slug, nameNoExt]
-      const content = await getMdContent(source, fileSlug)
-      return {
-        name: content?.title ?? nameNoExt,
-        slug: fileSlug.join('/'),
-      }
-    }
-
-    return null
-  })
-
-  return entries.filter((e): e is MdEntry => e !== null)
+  return buildEntries(new Set(mdPaths), mdPaths, basePrefix, slug)
 }
